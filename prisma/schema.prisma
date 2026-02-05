@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(cuid())
+  username String @unique
+  password String
+  role     String // ADMIN, EVALUATOR
+  evaluations Evaluation[]
+}
+
+model Team {
+  id            String   @id @default(cuid())
+  teamName      String   @unique
+  psNumber      String?
+  email         String
+  driveFileId   String   @unique
+  fileType      String   // PPT, VIDEO
+  folderName    String?  // Folder 1, Folder 2, etc.
+  status        String   @default("PENDING") // PENDING, SELECTED, REJECTED
+  score         Int?     // 0-10
+  isStarred     Boolean  @default(false)
+  comments      String?
+  attendance    Boolean  @default(false)
+  respondedAt   DateTime?
+  evaluation    Evaluation?
+}
+
+model Evaluation {
+  id          String   @id @default(cuid())
+  teamId      String   @unique
+  team        Team     @relation(fields: [teamId], references: [id])
+  evaluatorId String
+  evaluator   User     @relation(fields: [evaluatorId], references: [id])
+  score       Int
+  comments    String
+  createdAt   DateTime @default(now())
+}
